@@ -1,25 +1,35 @@
 from datetime import datetime
-from os import access
-
-from anyio.lowlevel import current_token
-from fastapi import HTTPException
 
 import bcrypt
-from click import pause
-from fastapi.params import Depends
-from fastapi.security import APIKeyHeader
-from jose import jwt, JWTError
-from starlette import status
+from jose import jwt
 
 from users.managers import user_manager
-
+from users.models import AdminUser, RegularUser
 
 SECRET_KEY = "super_secret"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1
 REFRESH_TOKEN_EXPIRE_MINUTES = 10
 
+
+class TokenIsNotValidError(Exception):
+    pass
+
+
 class UserService:
+
+    @staticmethod
+    def add(username, password, email, is_admin, permissions):
+        if is_admin:
+            user = AdminUser(username, password, email)
+        else:
+            user = RegularUser(username, password, email, permissions)
+
+        user_manager.add_user(user)
+
+    @staticmethod
+    def get_all():
+        return user_manager.get_all_users()
 
     @staticmethod
     def verify_password(plain_password, hashed_password) -> bool:
@@ -41,22 +51,16 @@ class UserService:
         return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
     @classmethod
-    def get_current_user(cls, token= Depends(APIKeyHeader(name="Authorization"))):
+    def get_current_user(cls, token):
         username = cls.verify_token(token, "access")
         return user_manager.users.get(username)
 
 
     @staticmethod
     def verify_token(token, token_type):
-        try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            exp = payload.get("exp")
-            current_token_type = payload.get("type")
-            if current_token_type != token_type or datetime.fromtimestamp(exp) < datetime.now():
-                raise HTTPException(status_code=401, detail="Token is not valid")
-            return payload.get("sub")
-        except JWTError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Authentication error"
-            )
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        current_token_type = payload.get("type")
+        if current_token_type != token_type:
+            raise TokenIsNotValidError("Token is not valid")
+        return payload.get("sub")
+

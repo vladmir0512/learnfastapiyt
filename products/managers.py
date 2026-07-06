@@ -1,28 +1,32 @@
-from fastapi import HTTPException
+class ProductAlreadyExistsError(Exception):
+    pass
+
+class ProductNotFoundError(Exception ):
+    pass
 
 
 class ProductManager:
     def __init__(self):
         self.products = {}
 
-    def add_product(self, product):
+    def add(self, product):
         if self._is_product_exist(product.id):
-            raise HTTPException(status_code=400, detail="Product already exists")
+            raise ProductAlreadyExistsError("Product already exists")
         self.products[product.id] = product
 
-    def get_product(self, product_id):
+    def get(self, product_id):
         if not self._is_product_exist(product_id):
-            raise HTTPException(status_code=404, detail="Product not found")
+            raise ProductNotFoundError("Product not found")
         return self.products[product_id]
 
-    def update_product(self, product_id, product):
+    def update(self, product_id, product):
         if not self._is_product_exist(product_id):
-            raise HTTPException(status_code=404, detail="Product not found")
+            raise ProductNotFoundError("Product not found")
         self.products[product_id] = product
 
-    def delete_product(self, product_id):
-        if not self._is_product_exist():
-            raise HTTPException(status_code=404, detail="Product not found")
+    def delete(self, product_id):
+        if not self._is_product_exist(product_id):
+            raise ProductNotFoundError("Product not found")
         del self.products[product_id]
 
     def _is_product_exist(self, product_id):

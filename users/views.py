@@ -4,11 +4,12 @@ from typing import List, Optional
 import bcrypt
 from fastapi import APIRouter, Query, HTTPException
 from fastapi.params import Depends
+from jose import JWTError
 from starlette import status
 
-from users.managers import user_manager
-from users.models import AdminUser, RegularUser, PERMISSIONS
-from users.services import UserService, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES
+from users.dependencies import get_current_user
+from users.models import PERMISSIONS
+from users.services import UserService, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES, TokenIsNotValidError
 
 users_router = APIRouter(prefix="/users", tags=["Пользователи"])
 
@@ -20,20 +21,14 @@ def add_user(username: str, password: str, email:str, is_admin: bool, permission
     example=PERMISSIONS,
     enum=PERMISSIONS
 )):
-
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-    if is_admin:
-        user = AdminUser(username, hashed_password, email)
-    else:
-        user = RegularUser(username, hashed_password, email, permissions)
-
-    user_manager.add_user(user)
+    UserService.add(username=username, password=hashed_password, email=email, is_admin=is_admin, permissions=permissions)
     return {"message": f"User {username} was added successfully"}
 
 @users_router.get("")
 def get_all_users():
-    return user_manager.get_all_users()
+    return UserService.get_all()
 
 @users_router.get("/login")
 def login(username: str, password: str):
@@ -57,8 +52,10 @@ def login(username: str, password: str):
 
 @users_router.post("/refresh")
 def refresh_access_token(token: str):
-    username = UserService.verify_token(token, "refresh")
-
+    try:
+        username = UserService.verify_token(token, "refresh")
+    except (JWTError, TokenIsNotValidError) as error:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = UserService.create_token(
@@ -72,5 +69,5 @@ def refresh_access_token(token: str):
 
 
 @users_router.get("/me")
-def me(current_user=Depends(UserService.get_current_user)):
+def me(current_user=Depends(get_current_user)):
     return {"message": f"Hello, {current_user.username}"}
