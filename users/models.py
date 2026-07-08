@@ -1,5 +1,5 @@
+from users.permissions import Permissions
 
-PERMISSIONS = ["view_product", "update_product", "add_product", "delete_product"]
 
 class BaseUser:
     def __init__(self, username,  password, email, is_admin, permissions):
@@ -19,7 +19,7 @@ class BaseUser:
 
 class AdminUser(BaseUser):
     def __init__(self, username, password, email):
-        super().__init__(username, password, email, is_admin=True, permissions=PERMISSIONS)
+        super().__init__(username, password, email, is_admin=True, permissions=Permissions.list())
 
 
 class RegularUser(BaseUser):

@@ -8,7 +8,7 @@ from jose import JWTError
 from starlette import status
 
 from users.dependencies import get_current_user
-from users.models import PERMISSIONS
+from users.permissions import Permissions
 from users.services import UserService, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES, TokenIsNotValidError
 
 users_router = APIRouter(prefix="/users", tags=["Пользователи"])
@@ -18,8 +18,8 @@ users_router = APIRouter(prefix="/users", tags=["Пользователи"])
 def add_user(username: str, password: str, email:str, is_admin: bool, permissions: Optional[List[str]] = Query(
     default=None,
     title="Permissions",
-    example=PERMISSIONS,
-    enum=PERMISSIONS
+    example=Permissions.list(),
+    enum=Permissions.list()
 )):
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
