@@ -1,8 +1,4 @@
-class ProductAlreadyExistsError(Exception):
-    pass
-
-class ProductNotFoundError(Exception ):
-    pass
+from products.exceptions import ProductAlreadyExistsError, ProductNotFoundError
 
 
 class ProductManager:
