@@ -2,8 +2,7 @@ from functools import wraps
 from inspect import signature
 from typing import List
 
-from fastapi import Depends, HTTPException
-from starlette import status
+from fastapi import HTTPException
 
 
 

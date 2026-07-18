@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import Depends, HTTPException
 from fastapi.security import APIKeyHeader
 from jose import JWTError

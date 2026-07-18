@@ -4,8 +4,8 @@ from pydantic import BaseModel
 from users.decorators import check_permissions_decorator
 from users.dependencies import get_current_user
 from users.permissions import Permissions
-from .decorators import handle_product_errors
-from .services import product_service
+from products.decorators import handle_product_errors
+from products.services import product_service
 
 products_router = APIRouter(prefix="/products", tags=["Продукты"])
 
@@ -15,7 +15,7 @@ class Product(BaseModel):
     price: float
 
 @products_router.post("")
-@check_permissions_decorator([Permissions.ADD_PRODUCT])
+@check_permissions_decorator([Permissions.ADD_PRODUCT.value])
 @handle_product_errors
 async def create_product(product: Product, current_user=Depends(get_current_user)):
     product_service.add(product)
@@ -26,14 +26,14 @@ async def create_product(product: Product, current_user=Depends(get_current_user
 
 
 @products_router.get("/{product_id}")
-@check_permissions_decorator([Permissions.VIEW_PRODUCT])
+@check_permissions_decorator([Permissions.VIEW_PRODUCT.value])
 @handle_product_errors
 async def get_product(product_id: int, current_user=Depends(get_current_user)):
     return product_service.get(product_id)
 
 
 @products_router.put("/{product_id}")
-@check_permissions_decorator([Permissions.UPDATE_PRODUCT])
+@check_permissions_decorator([Permissions.UPDATE_PRODUCT.value])
 @handle_product_errors
 async def update_product(product_id: int, product: Product, current_user=Depends(get_current_user)):
     product_service.update(product_id, product)
@@ -41,7 +41,7 @@ async def update_product(product_id: int, product: Product, current_user=Depends
 
 
 @products_router.delete("/{product_id}")
-@check_permissions_decorator([Permissions.DELETE_PRODUCT])
+@check_permissions_decorator([Permissions.DELETE_PRODUCT.value])
 @handle_product_errors
 async def delete_product(product_id: int, current_user=Depends(get_current_user)):
     product_service.delete(product_id)

@@ -1,7 +1,7 @@
-from enum import StrEnum
+from enum import Enum
 
 
-class Permissions(StrEnum):
+class Permissions(Enum):
     VIEW_PRODUCT = "view_product"
     UPDATE_PRODUCT = "update_product"
     ADD_PRODUCT = "add_product"
@@ -9,4 +9,4 @@ class Permissions(StrEnum):
 
     @classmethod
     def list(cls):
-        return [permission for permission in cls]
+        return [permission.value for permission in cls]
