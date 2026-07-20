@@ -1,4 +1,4 @@
-from users.models import BaseUser
+from core.user.entities import BaseUser
 from fastapi import HTTPException
 
 class UserManager:
@@ -11,6 +11,6 @@ class UserManager:
         self.users[user.username] = user
 
     def get_all_users(self):
-        return [user.get_info() for user in self.users.values()]
+        return self.users.values()
 
 user_manager = UserManager()

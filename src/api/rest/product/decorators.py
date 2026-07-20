@@ -2,7 +2,7 @@ from functools import wraps
 from fastapi import HTTPException
 from starlette import status
 
-from products.exceptions import ProductNotFoundError, ProductAlreadyExistsError
+from core.product.exceptions import ProductNotFoundError, ProductAlreadyExistsError
 
 
 def handle_product_errors(func):

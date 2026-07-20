@@ -1,4 +1,4 @@
-from users.permissions import Permissions
+from core.permissions import Permissions
 
 
 class BaseUser:
@@ -9,13 +9,6 @@ class BaseUser:
         self.is_admin = is_admin
         self.permissions = permissions
 
-    def get_info(self):
-        return {
-            "username": self.username,
-            "email": self.email,
-            "is_admin": self.is_admin,
-            "permissions": self.permissions
-        }
 
 class AdminUser(BaseUser):
     def __init__(self, username, password, email):

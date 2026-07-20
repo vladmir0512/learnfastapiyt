@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from users.decorators import check_permissions_decorator
-from users.dependencies import get_current_user
-from users.permissions import Permissions
-from products.decorators import handle_product_errors
-from products.services import product_service
+from core.permissions import Permissions
+from core.product.services import product_service
+from api.rest.user.decorators import check_permissions_decorator
+from dependencies import get_current_user
+from api.rest.product.decorators import handle_product_errors
 
 products_router = APIRouter(prefix="/products", tags=["Продукты"])
 

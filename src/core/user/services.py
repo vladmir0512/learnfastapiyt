@@ -3,8 +3,8 @@ from datetime import datetime
 import bcrypt
 from jose import jwt
 
+from core.user.entities import AdminUser, RegularUser
 from users.managers import user_manager
-from users.models import AdminUser, RegularUser
 
 SECRET_KEY = "super_secret"
 ALGORITHM = "HS256"
@@ -20,10 +20,12 @@ class UserService:
 
     @staticmethod
     def add(username, password, email, is_admin, permissions):
+        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
         if is_admin:
-            user = AdminUser(username, password, email)
+            user = AdminUser(username, hashed_password, email)
         else:
-            user = RegularUser(username, password, email, permissions)
+            user = RegularUser(username, hashed_password, email, permissions)
 
         user_manager.add_user(user)
 
@@ -33,7 +35,6 @@ class UserService:
 
     @staticmethod
     def verify_password(plain_password, hashed_password) -> bool:
-        print(f"Hash type: {type(hashed_password)}, value: {hashed_password!r}")  # <-- debug
         return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
     @classmethod

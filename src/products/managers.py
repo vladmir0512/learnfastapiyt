@@ -1,4 +1,4 @@
-from products.exceptions import ProductAlreadyExistsError, ProductNotFoundError
+from core.product.exceptions import ProductAlreadyExistsError, ProductNotFoundError
 
 
 class ProductManager:

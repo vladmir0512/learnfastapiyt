@@ -1,15 +1,15 @@
 from datetime import timedelta
 from typing import List, Optional
 
-import bcrypt
 from fastapi import APIRouter, Query, HTTPException
 from fastapi.params import Depends
 from jose import JWTError
 from starlette import status
 
-from users.dependencies import get_current_user
-from users.permissions import Permissions
-from users.services import UserService, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES, TokenIsNotValidError
+from core.permissions import Permissions
+from core.user.services import UserService, REFRESH_TOKEN_EXPIRE_MINUTES, ACCESS_TOKEN_EXPIRE_MINUTES, \
+    TokenIsNotValidError
+from dependencies import get_current_user
 
 users_router = APIRouter(prefix="/users", tags=["Пользователи"])
 
@@ -21,9 +21,8 @@ def add_user(username: str, password: str, email:str, is_admin: bool, permission
     example=Permissions.list(),
     enum=Permissions.list()
 )):
-    hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-    UserService.add(username=username, password=hashed_password, email=email, is_admin=is_admin, permissions=permissions)
+    UserService.add(username=username, password=password, email=email, is_admin=is_admin, permissions=permissions)
     return {"message": f"User {username} was added successfully"}
 
 @users_router.get("")
