@@ -7,7 +7,8 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgresql+psycopg2://postgres:password@db:5432/mydatabase
+      ASYNC_DATABASE_URL: postgresql+asyncpg://postgres:password@db:5432/mydatabase
+      SYNC_DATABASE_URL: postgresql+psycopg2://postgres:password@db:5432/mydatabase
     ports:
       - "8000:8000"
     volumes:

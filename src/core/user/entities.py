@@ -16,8 +16,8 @@ class AdminUser(BaseUser):
 
 
 class RegularUser(BaseUser):
-    def __init__(self, username, password, email, permissions):
-        super().__init__(username, password, email, is_admin=False, permissions=permissions)
+    def __init__(self, username, password, email):
+        super().__init__(username, password, email, is_admin=False, permissions=[])
 
 
 

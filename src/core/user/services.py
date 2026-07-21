@@ -5,9 +5,8 @@ from jose import jwt
 
 from core.user.entities import AdminUser, RegularUser
 from core.user.exceptions import UserAlreadyExistsError, TokenIsNotValidError, ServiceError
-from infrostructure.database.exceptions import UnitOfWorkError
-from infrostructure.database.repositories.user import user_repository_factory
-from infrostructure.database.uow import unit_of_work
+from infrastructure.database.repositories.user import user_repository_factory
+from infrastructure.database.uow import unit_of_work
 
 SECRET_KEY = "super_secret"
 ALGORITHM = "HS256"
@@ -20,27 +19,19 @@ class UserService:
     def __init__(self, repository_factory):
         self.user_repository_factory = repository_factory
 
-    def add(self, username, password, email, is_admin, permissions):
+    async def create(self, username, password, email):
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        user = RegularUser(username, hashed_password, email)
 
-        if is_admin:
-            user = AdminUser(username, hashed_password, email)
-        else:
-            user = RegularUser(username, hashed_password, email, permissions)
+        async with unit_of_work() as uow:
+            user_repository = self.user_repository_factory(uow.session)
+            existing_user = await user_repository.get_by_username(username)
+            if existing_user:
+                raise UserAlreadyExistsError("User already exists")
 
+            await user_repository.add(user)
 
-        try:
-            with unit_of_work() as uow:
-                user_repository = self.user_repository_factory(uow.session)
-                if user_repository.get_by_username(username):
-                    raise UserAlreadyExistsError("User already exists")
-
-                user_repository.add(AdminUser(username="john", password=hashed_password, email="john@test.com"))
-        except UnitOfWorkError:
-            raise ServiceError(f"Failed to add users")
-
-
-    def get_all(self):
+    async def get_all(self):
         return self.user_repository.get_all_users()
 
     @staticmethod

@@ -7,6 +7,7 @@ from jose import JWTError
 from starlette import status
 
 from api.rest.user.decorators import handle_user_errors
+from api.rest.user.models import UserCreate
 from core.permissions import Permissions
 from core.user.services import user_service, REFRESH_TOKEN_EXPIRE_MINUTES, ACCESS_TOKEN_EXPIRE_MINUTES, \
     TokenIsNotValidError
@@ -15,17 +16,11 @@ from dependencies import get_current_user
 users_router = APIRouter(prefix="/users", tags=["Пользователи"])
 
 
-@users_router.post("")
+@users_router.post("/register")
 @handle_user_errors
-async def add_user(username: str, password: str, email:str, is_admin: bool, permissions: Optional[List[str]] = Query(
-    default=None,
-    title="Permissions",
-    example=Permissions.list(),
-    enum=Permissions.list()
-)):
-
-    user_service.add(username=username, password=password, email=email, is_admin=is_admin, permissions=permissions)
-    return {"message": f"User {username} was added successfully"}
+async def register(user: UserCreate):
+    await user_service.create(username=user.username, password=user.password, email=user.email)
+    return {"message": f"User {user.username} was added successfully"}
 
 @users_router.get("")
 def get_all_users():
