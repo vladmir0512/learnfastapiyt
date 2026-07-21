@@ -16,7 +16,9 @@ dependencies = [
     "psycopg2-binary (>=2.9.12,<3.0.0)",
     "strawberry-graphql[debug-server] (>=0.321.1,<0.322.0)",
     "secretstorage (>=3.5.0,<4.0.0)",
-    "python-multipart (>=0.0.32,<0.0.33)"
+    "python-multipart (>=0.0.32,<0.0.33)",
+    "alembic (>=1.18.5,<2.0.0)",
+    "pydantic-settings (>=2.14.2,<3.0.0)"
 ]
 
 

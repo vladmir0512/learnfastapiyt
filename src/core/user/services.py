@@ -2,9 +2,11 @@ from datetime import datetime
 
 import bcrypt
 from jose import jwt
+from poetry.console.commands import self
 
 from core.user.entities import AdminUser, RegularUser
-from users.managers import user_manager
+from core.user.exceptions import UserAlreadyExistsError, TokenIsNotValidError
+from infrostructure.database.repositories.user import user_repository
 
 SECRET_KEY = "super_secret"
 ALGORITHM = "HS256"
@@ -12,14 +14,12 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 1
 REFRESH_TOKEN_EXPIRE_MINUTES = 10
 
 
-class TokenIsNotValidError(Exception):
-    pass
-
 
 class UserService:
+    def __init__(self, repository):
+        self.user_repository = repository
 
-    @staticmethod
-    def add(username, password, email, is_admin, permissions):
+    def add(self, username, password, email, is_admin, permissions):
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
         if is_admin:
@@ -27,19 +27,20 @@ class UserService:
         else:
             user = RegularUser(username, hashed_password, email, permissions)
 
-        user_manager.add_user(user)
+        if self.user_repository.get_by_username(username):
+            raise UserAlreadyExistsError("User already exists")
 
-    @staticmethod
-    def get_all():
-        return user_manager.get_all_users()
+        self.user_repository.add(user)
+
+    def get_all(self):
+        return self.user_repository.get_all_users()
 
     @staticmethod
     def verify_password(plain_password, hashed_password) -> bool:
         return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
-    @classmethod
-    def authenticate_user(cls, username, password):
-        user = user_manager.users.get(username)
+    def authenticate_user(self, username, password):
+        user = self.user_repository.users.get(username)
         if not user or not cls.verify_password(password, user.password):
             return None
         return user
@@ -51,10 +52,10 @@ class UserService:
         payload.update({"exp": expire})
         return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
-    @classmethod
-    def get_current_user(cls, token):
-        username = cls.verify_token(token, "access")
-        return user_manager.users.get(username)
+
+    def get_current_user(self, token):
+        username = self.verify_token(token, "access")
+        return self.user_repository.users.get(username)
 
 
     @staticmethod
@@ -65,3 +66,4 @@ class UserService:
             raise TokenIsNotValidError("Token is not valid")
         return payload.get("sub")
 
+user_service = UserService(user_repository)
