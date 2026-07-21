@@ -17,12 +17,15 @@ class UserRepository:
         return self.session.query(User).all()
 
     def add(self, user: BaseUser):
-        self.session.add(User(
-            email=user.email,
-            password=user.password,
-            username=user.username,
-            is_admin=user.is_admin
-        ))
-        self.session.commit()
+        self.session.add(
+                User(
+                    email=user.email,
+                    password=user.password,
+                    username=user.username,
+                    is_admin=user.is_admin
+            )
+        )
 
-user_repository = UserRepository(SessionLocal())
+
+def user_repository_factory(session):
+    return UserRepository(session)

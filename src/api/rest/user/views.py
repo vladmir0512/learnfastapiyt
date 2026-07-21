@@ -17,7 +17,7 @@ users_router = APIRouter(prefix="/users", tags=["Пользователи"])
 
 @users_router.post("")
 @handle_user_errors
-def add_user(username: str, password: str, email:str, is_admin: bool, permissions: Optional[List[str]] = Query(
+async def add_user(username: str, password: str, email:str, is_admin: bool, permissions: Optional[List[str]] = Query(
     default=None,
     title="Permissions",
     example=Permissions.list(),

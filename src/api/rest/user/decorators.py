@@ -5,7 +5,7 @@ from typing import List
 from fastapi import HTTPException
 from starlette import status
 
-from core.user.exceptions import TokenIsNotValidError, UserAlreadyExistsError
+from core.user.exceptions import TokenIsNotValidError, UserAlreadyExistsError, ServiceError
 
 
 def check_permissions_decorator(required_permissions: List[str]):
@@ -38,7 +38,7 @@ def handle_user_errors(func):
     async def wrapper(*args, **kwargs):
         try:
             return await func(*args, **kwargs)
-        except (TokenIsNotValidError, UserAlreadyExistsError) as error:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=(error))
+        except (TokenIsNotValidError, UserAlreadyExistsError, ServiceError) as error:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
 
     return wrapper

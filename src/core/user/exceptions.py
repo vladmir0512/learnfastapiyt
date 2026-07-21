@@ -3,3 +3,6 @@ class TokenIsNotValidError(Exception):
 
 class UserAlreadyExistsError(Exception):
     pass
+
+class ServiceError(Exception):
+    pass
