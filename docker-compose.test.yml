@@ -3,7 +3,7 @@ services:
     build:
       context: .
     container_name: test_app
-    command: uvicorn main:app --host 0.0.0.0 --port 7000 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       - test_db
     environment:
@@ -17,10 +17,6 @@ services:
     image: postgres:16
     container_name: postgres_test
     environment:
-      POSTGRES_DB: test_db
       POSTGRES_USER: test_user
       POSTGRES_PASSWORD: test_password
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
-      interval: 5s
-      retries: 5
+      POSTGRES_DB: test_db
