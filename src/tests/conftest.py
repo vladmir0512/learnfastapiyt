@@ -1,17 +1,17 @@
 import pytest
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from starlette.testclient import TestClient
 
 from config import settings
-from infrastructure.database.base import Base, get_db
+from infrastructure.database.base import Base
 from main import app
 
 engine = create_engine(settings.sync_database_url)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def setup_database():
     Base.metadata.create_all(bind=engine)
     yield
@@ -27,17 +27,13 @@ def db_session():
         session.rollback()
         session.close()
 
-@pytest.fixture(scope="module")
-def client():
-    def override_get_db():
-        db = TestingSessionLocal()
-        try:
-            yield db
-        finally:
-            db.close()
 
+@pytest.fixture
+async def client():
+    transport = ASGITransport(app=app)
 
-    app.dependency_overrides[get_db] = override_get_db
-    client = TestClient(app)
-    yield client
-    app.dependency_overrides.clear()
+    async with AsyncClient(
+        transport=transport,
+        base_url="http://test"
+    ) as ac:
+        yield ac
