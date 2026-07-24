@@ -1,5 +1,6 @@
 import pytest_asyncio
 import pytest
+from unittest.mock import AsyncMock, patch
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -29,12 +30,14 @@ def db_session():
         session.close()
 
 
+MOCK_USER = {"id": 1, "email": "test@example.com", "username": "testuser", "is_admin": False}
+
+
 @pytest_asyncio.fixture
 async def client():
-    transport = ASGITransport(app=app)
-
-    async with AsyncClient(
-        transport=transport,
-        base_url="http://test"
-    ) as ac:
-        yield ac
+    with patch("api.rest.views.users_client") as mock_uc:
+        mock_uc.get_user_by_id = AsyncMock(return_value=MOCK_USER)
+        mock_uc.get_user_by_email = AsyncMock(return_value=MOCK_USER)
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            yield ac, mock_uc

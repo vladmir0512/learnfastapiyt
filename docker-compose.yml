@@ -3,24 +3,56 @@ services:
     build:
       context: users/
     container_name: users_app
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: >
+      sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
     depends_on:
-      - db
+      - users_db
     environment:
-      ASYNC_DATABASE_URL: postgresql+asyncpg://postgres:password@db:5432/mydatabase
-      SYNC_DATABASE_URL: postgresql+psycopg2://postgres:password@db:5432/mydatabase
+      ASYNC_DATABASE_URL: postgresql+asyncpg://postgres:password@users_db:5432/users_db
+      SYNC_DATABASE_URL: postgresql+psycopg2://postgres:password@users_db:5432/users_db
+      INTERNAL_API_KEY: internal_secret_key_2026
     ports:
       - "8000:8000"
     volumes:
       - ./users/src:/app
 
-  db:
+  tasks_app:
+    build:
+      context: tasks/
+    container_name: tasks_app
+    command: >
+      sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 7000 --reload"
+    depends_on:
+      - tasks_db
+    environment:
+      ASYNC_DATABASE_URL: postgresql+asyncpg://postgres:password@tasks_db:5432/tasks_db
+      SYNC_DATABASE_URL: postgresql+psycopg2://postgres:password@tasks_db:5432/tasks_db
+      USERS_SERVICE_URL: http://users_app:8000
+      INTERNAL_API_KEY: internal_secret_key_2026
+    ports:
+      - "8001:7000"
+    volumes:
+      - ./tasks/src:/app
+
+  users_db:
     image: postgres:16
-    container_name: postgres_db
+    container_name: users_db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydatabase
+      POSTGRES_DB: users_db
+    volumes:
+      - users_pgdata:/var/lib/postgresql/data
+
+  tasks_db:
+    image: postgres:16
+    container_name: tasks_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: tasks_db
+    volumes:
+      - tasks_pgdata:/var/lib/postgresql/data
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -31,13 +63,24 @@ services:
     ports:
       - "5050:80"
     depends_on:
-      - db
+      - users_db
+      - tasks_db
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
 
   nginx:
     image: nginx:latest
     container_name: my_nginx
     ports:
       - "80:80"
+    depends_on:
+      - users_app
+      - tasks_app
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
       - ./nginx/src:/usr/share/nginx/html
+
+volumes:
+  users_pgdata:
+  tasks_pgdata:
+  pgadmin_data:

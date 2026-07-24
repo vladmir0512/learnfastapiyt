@@ -67,11 +67,23 @@ class UserService:
 
     @staticmethod
     def verify_token(token, token_type):
+        if token.startswith("Bearer "):
+            token = token[7:]
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         current_token_type = payload.get("type")
         if current_token_type != token_type:
             raise TokenIsNotValidError("Token is not valid")
         return payload.get("sub")
+
+    @staticmethod
+    def verify_token_payload(token, token_type):
+        if token.startswith("Bearer "):
+            token = token[7:]
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        current_token_type = payload.get("type")
+        if current_token_type != token_type:
+            raise TokenIsNotValidError("Token is not valid")
+        return payload
 
 
 user_service = UserService(user_repository_factory)

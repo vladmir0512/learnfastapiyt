@@ -7,7 +7,7 @@ from starlette import status
 
 from api.rest.decorators import handle_user_errors, check_permissions_decorator
 from api.rest.models import UserCreate, UserLogin, PatchUser, CurrentUser
-from dependencies import get_current_user
+from dependencies import get_current_user, verify_internal_key
 from core.exceptions import UserAlreadyExistsError, ServiceError
 from core.services import user_service, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES, \
     TokenIsNotValidError
@@ -53,10 +53,10 @@ async def login(user: UserLogin):
     refresh_token_expires = timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
 
     access_token = await user_service.create_token(
-        data={"sub": authenticated_user.email, "type": "access"}, expires_delta=access_token_expires
+        data={"sub": authenticated_user.email, "user_id": authenticated_user.id, "type": "access"}, expires_delta=access_token_expires
     )
     refresh_token = await user_service.create_token(
-        data={"sub": authenticated_user.email, "type": "refresh"}, expires_delta=refresh_token_expires
+        data={"sub": authenticated_user.email, "user_id": authenticated_user.id, "type": "refresh"}, expires_delta=refresh_token_expires
     )
 
     return {
@@ -68,13 +68,15 @@ async def login(user: UserLogin):
 @users_router.post("/refresh")
 async def refresh_access_token(token: str):
     try:
-        email = user_service.verify_token(token, "refresh")
+        payload = user_service.verify_token_payload(token, "refresh")
+        email = payload.get("sub")
+        user_id = payload.get("user_id")
     except (JWTError, TokenIsNotValidError) as error:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = await user_service.create_token(
-        data={"sub": email, "type": "access"},
+        data={"sub": email, "user_id": user_id, "type": "access"},
         expires_delta=access_token_expires
     )
     return {"access_token": access_token}
@@ -90,3 +92,27 @@ async def me(current_user=Depends(get_current_user)):
 async def patch_user(user_id: int, user: PatchUser, current_user=Depends(get_current_user)):
     await user_service.patch(user_id, user)
     return {"is_admin": user.is_admin}
+
+
+@users_router.get("/{user_id}")
+async def get_user_by_id(user_id: int, _key: str = Depends(verify_internal_key)):
+    from infrastructure.database.repositories.user import user_repository_factory
+    from infrastructure.database.uow import unit_of_work
+    async with unit_of_work() as uow:
+        repo = user_repository_factory(uow.session)
+        user = await repo.get_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return {"id": user.id, "email": user.email, "username": user.username, "is_admin": user.is_admin}
+
+
+@users_router.get("/by-email/{email}")
+async def get_user_by_email(email: str, _key: str = Depends(verify_internal_key)):
+    from infrastructure.database.repositories.user import user_repository_factory
+    from infrastructure.database.uow import unit_of_work
+    async with unit_of_work() as uow:
+        repo = user_repository_factory(uow.session)
+        user = await repo.get_by_email(email)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return {"id": user.id, "email": user.email, "username": user.username, "is_admin": user.is_admin}

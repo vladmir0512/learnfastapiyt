@@ -1,8 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from starlette.middleware.cors import CORSMiddleware
-from starlette.staticfiles import StaticFiles
 
-from api.rest.views import users_router
+from api.rest.views import tasks_router
 import infrastructure.logging_configs.local  # noqa: F401
 
 app = FastAPI(redirect_slashes=False)
@@ -16,7 +15,5 @@ app.add_middleware(
 )
 
 api_v1_router = APIRouter(prefix="/v1/api")
-api_v1_router.include_router(users_router)
+api_v1_router.include_router(tasks_router)
 app.include_router(api_v1_router)
-
-app.mount("/media", StaticFiles(directory="media"), name="media")

@@ -16,5 +16,6 @@ build:
 
 test:
 	docker compose -f docker-compose.test.yml up --build -d --remove-orphans
-	docker compose -f docker-compose.test.yml exec -T test_users_app bash -c "pytest -s -vvv --asyncio-mode=auto"
+	docker compose -f docker-compose.test.yml exec -T test_users_app bash -c "pytest --tb=short -q --asyncio-mode=auto"
+	docker compose -f docker-compose.test.yml exec -T test_tasks_app bash -c "pytest --tb=short -q --asyncio-mode=auto"
 	docker compose -f docker-compose.test.yml down

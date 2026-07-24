@@ -14,6 +14,11 @@ class UserRepository:
         result = await self.session.execute(stmt)
         return result.scalars().first()
 
+    async def get_by_id(self, user_id: int):
+        stmt = select(User).where(User.id == user_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().first()
+
     async def get_all(self):
         result = await self.session.execute(select(User))
         return result.scalars().all()

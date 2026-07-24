@@ -5,22 +5,48 @@ services:
     container_name: test_users_app
     command: uvicorn main:app --host 0.0.0.0 --port 7000
     depends_on:
-      - test_db
+      - test_users_db
     environment:
       PYTHONPATH: /app
-      ASYNC_DATABASE_URL: postgresql+asyncpg://test_user:test_password@postgres_test:5432/test_db
-      SYNC_DATABASE_URL: postgresql+psycopg2://test_user:test_password@postgres_test:5432/test_db
+      ASYNC_DATABASE_URL: postgresql+asyncpg://test_user:test_password@test_users_db:5432/test_users_db
+      SYNC_DATABASE_URL: postgresql+psycopg2://test_user:test_password@test_users_db:5432/test_users_db
     volumes:
       - ./users/src:/app
 
-  test_db:
-    image: postgres:16
-    container_name: postgres_test
+  test_tasks_app:
+    build:
+      context: tasks/
+    container_name: test_tasks_app
+    command: uvicorn main:app --host 0.0.0.0 --port 7001
+    depends_on:
+      - test_tasks_db
     environment:
-      POSTGRES_DB: test_db
+      PYTHONPATH: /app
+      ASYNC_DATABASE_URL: postgresql+asyncpg://test_task:test_password@test_tasks_db:5432/test_tasks_db
+      SYNC_DATABASE_URL: postgresql+psycopg2://test_task:test_password@test_tasks_db:5432/test_tasks_db
+    volumes:
+      - ./tasks/src:/app
+
+  test_users_db:
+    image: postgres:16
+    container_name: postgres_test_users
+    environment:
+      POSTGRES_DB: test_users_db
       POSTGRES_USER: test_user
       POSTGRES_PASSWORD: test_password
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_users_db"]
+      interval: 5s
+      retries: 5
+
+  test_tasks_db:
+    image: postgres:16
+    container_name: postgres_test_tasks
+    environment:
+      POSTGRES_DB: test_tasks_db
+      POSTGRES_USER: test_task
+      POSTGRES_PASSWORD: test_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_task -d test_tasks_db"]
       interval: 5s
       retries: 5

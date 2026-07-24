@@ -3,134 +3,314 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Вход / Регистрация</title>
+  <title>Менеджер задач</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
   <div class="container mt-5">
     <div class="row justify-content-center">
-      <div class="col-md-6">
-        <h2 class="text-center">Добро пожаловать!</h2>
+      <div class="col-md-8">
 
-        <ul class="nav nav-tabs" id="auth-tabs" role="tablist">
-          <li class="nav-item" role="presentation">
-            <a class="nav-link active" id="login-tab" data-bs-toggle="tab" href="#login" role="tab" aria-controls="login" aria-selected="true">Вход</a>
-          </li>
-          <li class="nav-item" role="presentation">
-            <a class="nav-link" id="register-tab" data-bs-toggle="tab" href="#register" role="tab" aria-controls="register" aria-selected="false">Регистрация</a>
-          </li>
-        </ul>
-
-        <div class="tab-content mt-3" id="auth-tabs-content">
-          <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
-            <form id="login-form">
-              <div class="mb-3">
-                <label for="login-email" class="form-label">Электронная почта</label>
-                <input type="email" class="form-control" id="login-email" placeholder="Введите email" required>
-              </div>
-
-              <div class="mb-3">
-                <label for="login-password" class="form-label">Пароль</label>
-                <input type="password" class="form-control" id="login-password" placeholder="Введите пароль" required>
-              </div>
-
-              <button type="submit" class="btn btn-primary w-100">Войти</button>
-            </form>
-          </div>
-
-          <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
-            <form id="registration-form">
-              <div class="mb-3">
-                <label for="register-username" class="form-label">Имя пользователя</label>
-                <input type="text" class="form-control" id="register-username" placeholder="Введите имя пользователя" required>
-              </div>
-
-              <div class="mb-3">
-                <label for="register-email" class="form-label">Электронная почта</label>
-                <input type="email" class="form-control" id="register-email" placeholder="Введите email" required>
-              </div>
-
-              <div class="mb-3">
-                <label for="register-password" class="form-label">Пароль</label>
-                <input type="password" class="form-control" id="register-password" placeholder="Введите пароль" required>
-              </div>
-
-              <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
-            </form>
+        <!-- Auth Block -->
+        <div id="auth-block">
+          <h2 class="text-center">Добро пожаловать!</h2>
+          <ul class="nav nav-tabs" id="auth-tabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" data-bs-toggle="tab" href="#login">Вход</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="tab" href="#register">Регистрация</a>
+            </li>
+          </ul>
+          <div class="tab-content mt-3">
+            <div class="tab-pane fade show active" id="login" role="tabpanel">
+              <form id="login-form">
+                <div class="mb-3">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-control" id="login-email" placeholder="Введите email" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Пароль</label>
+                  <input type="password" class="form-control" id="login-password" placeholder="Введите пароль" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Войти</button>
+              </form>
+            </div>
+            <div class="tab-pane fade" id="register" role="tabpanel">
+              <form id="registration-form">
+                <div class="mb-3">
+                  <label class="form-label">Имя пользователя</label>
+                  <input type="text" class="form-control" id="register-username" placeholder="Введите имя" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-control" id="register-email" placeholder="Введите email" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Пароль</label>
+                  <input type="password" class="form-control" id="register-password" placeholder="Введите пароль" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+              </form>
+            </div>
           </div>
         </div>
 
-        <div id="error-message" class="alert alert-danger mt-3 d-none" role="alert">
-          Произошла ошибка. Попробуйте еще раз.
+        <!-- Dashboard (hidden by default) -->
+        <div id="dashboard-block" class="d-none">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Мои задачи</h2>
+            <button class="btn btn-outline-danger btn-sm" id="logout-btn">Выйти</button>
+          </div>
+
+          <div id="user-info" class="mb-3 text-muted"></div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title">Новая задача</h5>
+              <form id="task-form">
+                <div class="mb-2">
+                  <input type="text" class="form-control" id="task-title" placeholder="Название задачи" required>
+                </div>
+                <div class="mb-2">
+                  <textarea class="form-control" id="task-description" placeholder="Описание" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success w-100">Создать</button>
+              </form>
+            </div>
+          </div>
+
+          <div id="tasks-list"></div>
         </div>
 
-        <div id="success-message" class="alert alert-success mt-3 d-none" role="alert">
-          Операция выполнена успешно!
-        </div>
+        <div id="error-message" class="alert alert-danger mt-3 d-none" role="alert"></div>
+        <div id="success-message" class="alert alert-success mt-3 d-none" role="alert"></div>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    document.getElementById('registration-form').addEventListener('submit', function(event) {
-      event.preventDefault();
+    const API = '/api';
+    let token = localStorage.getItem('access_token');
 
-      const username = document.getElementById('register-username').value;
-      const email = document.getElementById('register-email').value;
-      const password = document.getElementById('register-password').value;
+    function showSuccess(msg) {
+      const el = document.getElementById('success-message');
+      el.textContent = msg;
+      el.classList.remove('d-none');
+      document.getElementById('error-message').classList.add('d-none');
+    }
 
-      const data = { username, email, password };
+    function showError(msg) {
+      const el = document.getElementById('error-message');
+      el.textContent = msg || 'Произошла ошибка';
+      el.classList.remove('d-none');
+      document.getElementById('success-message').classList.add('d-none');
+    }
 
-      fetch('http://localhost:8000/v1/api/users/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.message) {
-          document.getElementById('success-message').classList.remove('d-none');
-          document.getElementById('error-message').classList.add('d-none');
+    function hideMessages() {
+      document.getElementById('success-message').classList.add('d-none');
+      document.getElementById('error-message').classList.add('d-none');
+    }
+
+    function headers() {
+      return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+    }
+
+    function switchToDashboard() {
+      document.getElementById('auth-block').classList.add('d-none');
+      document.getElementById('dashboard-block').classList.remove('d-none');
+      loadTasks();
+    }
+
+    function switchToAuth() {
+      document.getElementById('auth-block').classList.remove('d-none');
+      document.getElementById('dashboard-block').classList.add('d-none');
+    }
+
+    // Register
+    document.getElementById('registration-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      hideMessages();
+      try {
+        const res = await fetch(API + '/users/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: document.getElementById('register-username').value,
+            email: document.getElementById('register-email').value,
+            password: document.getElementById('register-password').value
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.message) {
+          showSuccess('Регистрация успешна! Теперь войдите.');
         } else {
-          document.getElementById('error-message').classList.remove('d-none');
-          document.getElementById('success-message').classList.add('d-none');
+          showError(data.detail || 'Ошибка регистрации');
         }
-      })
-      .catch(error => {
-        document.getElementById('error-message').classList.remove('d-none');
-        document.getElementById('success-message').classList.add('d-none');
-      });
+      } catch { showError('Сервер недоступен'); }
     });
 
-    document.getElementById('login-form').addEventListener('submit', function(event) {
-      event.preventDefault();
-
-      const email = document.getElementById('login-email').value;
-      const password = document.getElementById('login-password').value;
-
-      const data = { email, password };
-
-      fetch('http://localhost:8000/v1/api/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.access_token) {
-          document.getElementById('success-message').classList.remove('d-none');
-          document.getElementById('error-message').classList.add('d-none');
+    // Login
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      hideMessages();
+      try {
+        const res = await fetch(API + '/users/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('login-email').value,
+            password: document.getElementById('login-password').value
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.access_token) {
+          token = data.access_token;
+          localStorage.setItem('access_token', token);
+          hideMessages();
+          switchToDashboard();
         } else {
-          document.getElementById('error-message').classList.remove('d-none');
-          document.getElementById('success-message').classList.add('d-none');
+          showError(data.detail || 'Неверные данные');
         }
-      })
-      .catch(error => {
-        document.getElementById('error-message').classList.remove('d-none');
-        document.getElementById('success-message').classList.add('d-none');
-      });
+      } catch { showError('Сервер недоступен'); }
     });
+
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', function() {
+      token = null;
+      localStorage.removeItem('access_token');
+      switchToAuth();
+    });
+
+    // Create task
+    document.getElementById('task-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      hideMessages();
+      const payload = {
+        title: document.getElementById('task-title').value,
+        description: document.getElementById('task-description').value
+      };
+      try {
+        const res = await fetch(API + '/tasks', {
+          method: 'POST',
+          headers: headers(),
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          document.getElementById('task-title').value = '';
+          document.getElementById('task-description').value = '';
+          showSuccess('Задача создана!');
+          loadTasks();
+        } else {
+          const data = await res.json();
+          showError(data.detail || 'Ошибка создания задачи');
+        }
+      } catch { showError('Сервер недоступен'); }
+    });
+
+    // Load tasks
+    async function loadTasks() {
+      try {
+        const res = await fetch(API + '/tasks', { headers: headers() });
+        if (res.status === 401) { token = null; localStorage.removeItem('access_token'); switchToAuth(); return; }
+        const tasks = await res.json();
+        const container = document.getElementById('tasks-list');
+        if (!tasks.length) {
+          container.innerHTML = '<div class="text-muted text-center">Задач пока нет</div>';
+          return;
+        }
+        container.innerHTML = tasks.map(t => {
+          const statusMap = { new: 'Новая', in_progress: 'В работе', done: 'Выполнена' };
+          const shared = (t.shared_with || []).map(email =>
+            `<span class="badge bg-info d-inline-flex align-items-center me-1 mb-1">
+              ${email}
+              <button type="button" class="btn-close btn-close-white ms-1" style="font-size:0.6em" onclick="unshareTask(${t.id}, '${email}')"></button>
+            </span>`
+          ).join('');
+          return `
+          <div class="card mb-2">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                  <h6 class="card-title">${t.title}</h6>
+                  <p class="card-text mb-1">${t.description || ''}</p>
+                  <small class="text-muted">Статус: ${statusMap[t.status] || t.status} | Создатель: ${t.creator_email || t.creator_id}</small>
+                  ${shared ? '<div class="mt-1"><small class="text-muted">Доступ:</small><br>' + shared + '</div>' : ''}
+                </div>
+                <div class="ms-2">
+                  <select class="form-select form-select-sm mb-1" onchange="updateTask(${t.id}, this.value)">
+                    <option value="new" ${t.status === 'new' ? 'selected' : ''}>Новая</option>
+                    <option value="in_progress" ${t.status === 'in_progress' ? 'selected' : ''}>В работе</option>
+                    <option value="done" ${t.status === 'done' ? 'selected' : ''}>Выполнена</option>
+                  </select>
+                  <button class="btn btn-outline-danger btn-sm mb-1" onclick="deleteTask(${t.id})">Удалить</button>
+                </div>
+              </div>
+              <div class="input-group input-group-sm mt-2">
+                <input type="email" class="form-control" id="share-email-${t.id}" placeholder="email для доступа">
+                <button class="btn btn-outline-primary" onclick="shareTask(${t.id})">Поделиться</button>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+      } catch { document.getElementById('tasks-list').innerHTML = '<div class="text-danger">Ошибка загрузки задач</div>'; }
+    }
+
+    // Update task status
+    async function updateTask(id, status) {
+      try {
+        await fetch(API + '/tasks/' + id, {
+          method: 'PATCH',
+          headers: headers(),
+          body: JSON.stringify({ status })
+        });
+        loadTasks();
+      } catch { showError('Ошибка обновления'); }
+    }
+
+    // Delete task
+    async function deleteTask(id) {
+      try {
+        await fetch(API + '/tasks/' + id, { method: 'DELETE', headers: headers() });
+        loadTasks();
+      } catch { showError('Ошибка удаления'); }
+    }
+
+    // Share task
+    async function shareTask(id) {
+      const input = document.getElementById('share-email-' + id);
+      const email = input.value.trim();
+      if (!email) return;
+      try {
+        const res = await fetch(API + '/tasks/' + id + '/share', {
+          method: 'POST',
+          headers: headers(),
+          body: JSON.stringify({ email })
+        });
+        if (res.ok) {
+          input.value = '';
+          loadTasks();
+        } else {
+          const data = await res.json();
+          showError(data.detail || 'Ошибка');
+        }
+      } catch { showError('Ошибка'); }
+    }
+
+    // Unshare task
+    async function unshareTask(id, email) {
+      try {
+        const res = await fetch(API + '/tasks/' + id + '/share', {
+          method: 'DELETE',
+          headers: headers(),
+          body: JSON.stringify({ email })
+        });
+        if (res.ok) loadTasks();
+      } catch { showError('Ошибка'); }
+    }
+
+    if (token) switchToDashboard();
   </script>
 </body>
 </html>
